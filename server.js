@@ -2,8 +2,8 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const ObjectID = require('mongodb').ObjectID;
 const db = require('./db');
+const artistsController = require('./controllers/artists');
 
 const app = express();
 
@@ -15,66 +15,15 @@ app.get('/', (req, res)=>{
     res.send('Hello API');
 });
 
-app.get('/artists', (req, res)=>{
-    db.get().collection('artists').find().toArray((err, docs)=>{
-        if(err){
-            console.log(err);
-            return res.sendStatus(500);
-        }
-        res.send(docs);
-    });
-});
+app.get('/artists', artistsController.all);
 
-app.get('/artists/:id', (req, res)=>{
-    db.get().collection('artists').findOne({_id: ObjectID(req.params.id) }, (err, doc)=>{
-        if (err){
-            console.log(err);
-            return res.sendStatus(500);
-        }
-        res.send(doc);
-    });
-});
+app.get('/artists/:id', artistsController.findById);
 
-app.post('/artists', (req, res)=> {
-    let newArtist = {
-        name: req.body.name
-    };
+app.post('/artists', artistsController.create);
 
-    db.get().collection('artists').insert(newArtist, (err, result)=>{
-        if(err){
-            console.log(err);
-            return res.sendStatus(500);
-        }
-        res.send(newArtist);
-    });
-});
+app.put('/artists/:id', artistsController.update);
 
-app.put('/artists/:id', (req, res)=>{
-    db.get().collection('artists').updateOne(
-        { _id: ObjectID(req.params.id) },
-        { name: req.body.name },
-        (err, result)=>{
-            if(err){
-                console.log(err);
-                return res.sendStatus(500);
-            }
-            res.sendStatus(200);
-        }
-    );
-});
-
-app.delete('/artists/:id', (req, res)=>{
-    db.get().collection('artists').deleteOne(
-        { _id: ObjectID(req.params.id) },
-        (err, result)=>{
-            if(err){
-                console.log(err);
-                return res.sendStatus(500);
-            }
-            res.sendStatus(200);
-        }
-    );
-});
+app.delete('/artists/:id', artistsController.delete);
 
 db.connect('mongodb://localhost:27017/mydb', (err)=>{
     if(err){
